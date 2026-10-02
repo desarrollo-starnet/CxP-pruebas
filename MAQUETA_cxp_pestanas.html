@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Maqueta CxP — Pestañas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Mono','Courier New',monospace;background:#f0fdf4;color:#111827;min-height:100vh;padding:0 16px 60px}
+  .wrap{max-width:1100px;margin:0 auto;padding:20px 0}
+  .maqueta{background:#fef3c7;border:1px dashed #f59e0b;color:#92400e;border-radius:10px;padding:10px 14px;font-size:12px;margin-bottom:18px;line-height:1.5}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+  .kpi-card{background:#fff;border:1px solid #d1fae5;border-radius:10px;padding:14px 12px;text-align:center}
+  .kpi-value{font-size:22px;font-weight:700;line-height:1;margin-bottom:6px}
+  .kpi-label{font-size:11px;color:#6b7280;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+  .kpi-sub{font-size:11px;color:#9ca3af}
+  .sel{background:#fff;border:1px solid #d1fae5;color:#374151;border-radius:6px;padding:7px 12px;font-size:13px;font-family:inherit;cursor:pointer;outline:none}
+  .search-input{background:#fff;border:1px solid #d1fae5;color:#374151;border-radius:6px;padding:7px 14px;font-size:13px;font-family:inherit;outline:none;min-width:160px;flex:1}
+  .btn-add{background:#16a34a;color:#fff;border:none;border-radius:6px;padding:7px 18px;font-weight:700;font-size:13px;font-family:inherit;letter-spacing:.06em;cursor:pointer;white-space:nowrap}
+  .btn-add:hover{background:#15803d}
+  .btn-mini{background:#fff;border:1px solid #d1d5db;color:#374151;border-radius:6px;padding:4px 10px;font-size:11px;font-family:inherit;cursor:pointer;white-space:nowrap}
+  .btn-mini.green{background:#f0fdf4;border-color:#86efac;color:#15803d;font-weight:700}
+  .btn-mini.blue{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8;font-weight:700}
+  .pills{display:flex;gap:3px;background:#f3f4f6;border-radius:8px;padding:3px;width:fit-content;flex-wrap:wrap}
+  .period-pill{font-size:12px;padding:6px 14px;border:none;background:transparent;border-radius:7px;cursor:pointer;font-family:inherit;color:#6b7280;white-space:nowrap}
+  .period-pill:hover{color:#374151}
+  .period-pill.on{background:#fff;color:#111827;font-weight:700;box-shadow:0 1px 4px #0000001a}
+  .pill-count{display:inline-block;background:#e5e7eb;color:#374151;border-radius:20px;padding:0 7px;font-size:10px;margin-left:4px}
+  .period-pill.on .pill-count{background:#dcfce7;color:#15803d}
+  .table-scroll{overflow-x:auto;border-radius:12px}
+  .thead,.trow{display:grid;gap:8px;padding:10px 14px;align-items:center}
+  .thead{background:#f9fafb;border:1px solid #e5e7eb;border-bottom:2px solid #e5e7eb;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6b7280;border-radius:12px 12px 0 0}
+  .tbody{background:#fff;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px}
+  .trow{border-bottom:1px solid #f3f4f6;font-size:13px}
+  .trow:hover{background:#f9fafb}
+  .trow:last-child{border-bottom:none}
+  .r{text-align:right}
+  .muted{font-size:11px;color:#9ca3af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .strong{font-weight:600;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .badge{display:inline-block;font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;white-space:nowrap}
+  .co{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:1px 7px;white-space:nowrap}
+  .folio{font-size:11px;font-weight:700;color:#0f172a;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;padding:2px 8px;font-family:monospace;white-space:nowrap}
+  .alert{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#92400e}
+  .note{font-size:11px;color:#6b7280;margin-top:10px;line-height:1.5}
+  /* Trabajos: tarjetas */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px}
+  .steps{display:flex;gap:3px;margin:10px 0 6px}
+  .step{flex:1;height:6px;border-radius:3px;background:#e5e7eb}
+  .bar{height:8px;background:#f3f4f6;border-radius:4px;overflow:hidden;margin-top:4px}
+  .bar>div{height:100%;background:#16a34a}
+  /* Modal */
+  .modal-overlay{position:fixed;inset:0;background:#00000033;display:none;align-items:center;justify-content:center;z-index:200;padding:16px}
+  .modal-box{background:#fff;border:1px solid #d1fae5;border-radius:16px;padding:26px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px #16a34a18}
+  .modal-title{font-size:16px;font-weight:700;color:#111827;margin-bottom:4px}
+  .modal-sub{font-size:12px;color:#9ca3af;margin-bottom:18px}
+  .form-group{margin-bottom:14px}
+  .form-label{display:block;font-size:11px;color:#6b7280;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+  .form-input{width:100%;background:#f9fafb;border:1px solid #e5e7eb;color:#111827;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none}
+  .form-input:focus{border-color:#16a34a;background:#fff}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .form-actions{display:flex;gap:10px;margin-top:20px}
+  .btn-save{background:#16a34a;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-weight:700;font-size:13px;font-family:inherit;cursor:pointer;flex:1}
+  .btn-cancel{background:none;border:1px solid #e5e7eb;color:#6b7280;border-radius:8px;padding:10px 20px;font-size:13px;font-family:inherit;cursor:pointer}
+  .seg{display:flex;gap:3px;background:#f3f4f6;border-radius:8px;padding:3px}
+  .seg button{flex:1;font-size:12px;padding:6px 8px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-family:inherit;color:#6b7280}
+  .seg button.on{background:#fff;color:#111827;font-weight:700;box-shadow:0 1px 4px #0000001a}
+  .check{display:flex;align-items:center;gap:8px;font-size:13px;color:#374151;cursor:pointer}
+  .hint{font-size:11px;color:#9ca3af;margin-top:4px}
+  .section-label{font-size:11px;font-weight:700;color:#16a34a;letter-spacing:.08em;text-transform:uppercase;margin:6px 0 10px;padding-top:10px;border-top:1px dashed #e5e7eb}
+  @media (max-width:760px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .form-row{grid-template-columns:1fr}
+    .cards{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="maqueta">🧪 <b>MAQUETA</b> — datos falsos, solo para visualizar. No se conecta a Supabase y nada se guarda (al recargar vuelve a como estaba). Los botones sí responden para que veas el flujo.</div>
+
+  <!-- Header (igual al de CxP) -->
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+    <div>
+      <div style="font-size:20px;font-weight:700;color:#111827">📤 Cuentas por Pagar</div>
+      <div style="font-size:13px;color:#9ca3af;margin-top:2px">Facturas y compromisos con proveedores — Al pagar se registra en Finanzas automáticamente</div>
+    </div>
+  </div>
+
+  <!-- Pestañas -->
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+    <div class="pills" id="tabs">
+      <button class="period-pill on" data-tab="facturas" onclick="setTab('facturas')">📄 Facturas<span class="pill-count" id="cnt-facturas"></span></button>
+      <button class="period-pill" data-tab="recurrentes" onclick="setTab('recurrentes')">🔁 Pagos recurrentes<span class="pill-count" id="cnt-recurrentes"></span></button>
+      <button class="period-pill" data-tab="trabajos" onclick="setTab('trabajos')">🔧 Trabajos de proveedores<span class="pill-count" id="cnt-trabajos"></span></button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:1;justify-content:flex-end">
+      <select class="sel" id="f-company" onchange="render()">
+        <option value="Todas">Todas las empresas</option>
+        <option>Eagle Video</option><option>Starnet Wireless</option><option>Estrella Climatización</option>
+      </select>
+      <select class="sel" id="f-status" onchange="render()"></select>
+      <input class="search-input" id="f-search" placeholder="🔍 Proveedor, concepto o folio OT..." oninput="render()"/>
+      <button class="btn-add" id="btn-new" onclick="nuevo()">+ Nueva factura</button>
+    </div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+  <div id="alert"></div>
+  <div id="content"></div>
+
+</div>
+
+<!-- MODAL: Pago recurrente -->
+<div class="modal-overlay" id="m-rec" onclick="if(event.target===this)cerrar('m-rec')">
+  <div class="modal-box">
+    <div class="modal-title" id="m-rec-title">🔁 Nuevo pago recurrente</div>
+    <div class="modal-sub">Plantilla del pago. Cada periodo se registra un cargo que se paga como cualquier factura de CxP.</div>
+
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Empresa *</label>
+        <select class="form-input" id="r-empresa"><option>Starnet Wireless</option><option>Eagle Video</option><option>Estrella Climatización</option></select></div>
+      <div class="form-group"><label class="form-label">Zona</label>
+        <select class="form-input" id="r-zona"><option>BCS</option><option>Sinaloa</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Proveedor * <span style="text-transform:none;letter-spacing:0;color:#9ca3af">(del catálogo de Proveedores)</span></label>
+      <select class="form-input" id="r-prov"></select></div>
+    <div class="form-group"><label class="form-label">Concepto *</label>
+      <input class="form-input" id="r-concepto" placeholder="Renta oficina, enlace dedicado, luz..."/></div>
+
+    <div class="section-label">Monto y frecuencia</div>
+    <div class="form-group"><label class="form-label">Tipo de monto</label>
+      <div class="seg" id="r-tipo"><button class="on" data-v="fijo" onclick="segSel('r-tipo',this)">Fijo — siempre igual</button><button data-v="variable" onclick="segSel('r-tipo',this)">Variable — se captura cada vez</button></div>
+      <div class="hint">Variable: el monto de abajo es un estimado; al registrar el cargo se pone el real (ej. recibo de luz).</div></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Monto (MXN) *</label><input class="form-input" id="r-monto" type="number" placeholder="0.00"/></div>
+      <div class="form-group"><label class="form-label">Frecuencia *</label>
+        <select class="form-input" id="r-frec"><option>Mensual</option><option>Bimestral</option><option>Trimestral</option><option>Semestral</option><option>Anual</option><option>Semanal</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Pagar del día</label><input class="form-input" id="r-dini" type="number" min="1" max="31" value="1"/></div>
+      <div class="form-group"><label class="form-label">Al día (límite)</label><input class="form-input" id="r-dfin" type="number" min="1" max="31" value="5"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Inicio</label><input class="form-input" id="r-inicio" type="date" value="2026-10-01"/></div>
+      <div class="form-group"><label class="form-label">Fin (opcional)</label><input class="form-input" id="r-fin" type="date"/><div class="hint">Contratos con vencimiento</div></div>
+    </div>
+
+    <div class="section-label">Cómo se paga</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Categoría en Finanzas</label>
+        <select class="form-input" id="r-cat"><option>Renta</option><option>Servicios (luz, agua)</option><option>Internet / Enlaces</option><option>Software</option><option>Seguros</option><option>Arrendamiento vehículos</option><option>Operación</option></select></div>
+      <div class="form-group"><label class="form-label">Cuenta que paga</label>
+        <select class="form-input" id="r-cuenta"><option>Banregio Starnet BCS</option><option>Banamex Eagle</option><option>BBVA Estrella</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Método</label>
+      <select class="form-input" id="r-metodo"><option>Transferencia</option><option>Tarjeta</option><option>Efectivo</option><option>Cheque</option></select></div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+      <label class="check"><input type="checkbox" id="r-domi"/> Domiciliado (se cobra solo de la cuenta; solo hay que confirmar el cargo)</label>
+      <label class="check"><input type="checkbox" id="r-xml" checked/> Requiere factura XML (avisar si falta)</label>
+    </div>
+    <div class="form-group"><label class="form-label">Notas</label><textarea class="form-input" id="r-notas" rows="2" placeholder="Número de contrato, cuenta de referencia..."></textarea></div>
+    <div class="form-actions"><button class="btn-cancel" onclick="cerrar('m-rec')">Cancelar</button><button class="btn-save" onclick="guardarRec()">✓ Guardar recurrente</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Registrar cargo del periodo -->
+<div class="modal-overlay" id="m-cargo" onclick="if(event.target===this)cerrar('m-cargo')">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-title">🧾 Registrar cargo del periodo</div>
+    <div class="modal-sub" id="m-cargo-sub"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Monto real *</label><input class="form-input" id="c-monto" type="number"/></div>
+      <div class="form-group"><label class="form-label">Vence</label><input class="form-input" id="c-vence" type="date"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Factura XML</label>
+      <div style="border:2px dashed #d1fae5;border-radius:8px;padding:14px;text-align:center;font-size:12px;color:#9ca3af">📎 Arrastra el XML (en la maqueta no hace nada)</div></div>
+    <div class="note">Esto crea una cuenta normal en la pestaña Facturas, ligada a este recurrente. Desde ahí se paga y se genera el egreso en Finanzas.</div>
+    <div class="form-actions"><button class="btn-cancel" onclick="cerrar('m-cargo')">Cancelar</button><button class="btn-save" onclick="confirmarCargo()">✓ Registrar cargo</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Trabajo de proveedor -->
+<div class="modal-overlay" id="m-trab" onclick="if(event.target===this)cerrar('m-trab')">
+  <div class="modal-box">
+    <div class="modal-title">🔧 Nuevo trabajo de proveedor</div>
+    <div class="modal-sub">Trabajo encargado a un proveedor o subcontratista. Su costo se suma a la OT ligada.</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Empresa *</label>
+        <select class="form-input" id="t-empresa"><option>Estrella Climatización</option><option>Starnet Wireless</option><option>Eagle Video</option></select></div>
+      <div class="form-group"><label class="form-label">Zona</label>
+        <select class="form-input" id="t-zona"><option>BCS</option><option>Sinaloa</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Proveedor *</label><select class="form-input" id="t-prov"></select></div>
+    <div class="form-group"><label class="form-label">OT ligada</label>
+      <select class="form-input" id="t-ot"></select>
+      <div class="hint">Se busca por folio, cliente o trabajo (como en el selector de OT actual). Puede quedar "Sin OT" si es un gasto interno.</div></div>
+    <div class="form-group"><label class="form-label">Descripción del trabajo *</label>
+      <textarea class="form-input" id="t-desc" rows="2" placeholder="Qué se le encargó al proveedor..."></textarea></div>
+
+    <div class="section-label">Dinero</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Monto acordado *</label><input class="form-input" id="t-monto" type="number" placeholder="0.00"/></div>
+      <div class="form-group"><label class="form-label">Anticipo (%)</label><input class="form-input" id="t-ant" type="number" value="50" min="0" max="100"/><div class="hint">0 = se paga todo al terminar</div></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Fecha de entrega</label><input class="form-input" id="t-entrega" type="date"/></div>
+      <div class="form-group"><label class="form-label">Estado inicial</label>
+        <select class="form-input" id="t-estado"><option value="cotizado">Cotizado</option><option value="autorizado">Autorizado</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Condiciones / notas</label>
+      <textarea class="form-input" id="t-notas" rows="2" placeholder="Garantía, materiales incluidos, acuerdos..."></textarea></div>
+    <div class="form-actions"><button class="btn-cancel" onclick="cerrar('m-trab')">Cancelar</button><button class="btn-save" onclick="guardarTrab()">✓ Guardar trabajo</button></div>
+  </div>
+</div>
+
+<script>
+// ═════════════════════════ DATOS FALSOS ═════════════════════════
+const HOY=new Date(2026,9,2);              // 2 oct 2026 (fijo para que la maqueta sea estable)
+const DIA=HOY.getDate();
+const PERIODO="Octubre 2026";
+const CO_COLOR={"Eagle Video":"#f59e0b","Starnet Wireless":"#3b82f6","Estrella Climatización":"#10b981"};
+const PROVEEDORES=["Inmobiliaria Pacífico Sur","Fibra Norte Enlaces","Energía Eléctrica (recibo)","Software Contable Nube","Aseguradora Vehicular MX","Arrendadora Flotillas","Instalaciones Frías del Mar","Torres y Estructuras Baja","Fletes Rápidos Culiacán","Herrería Hernández","Electricistas Unidos BCS"];
+const OTS=[
+  {folio:"OT-861",cli:"Hotel Brisas del Cabo",txt:"Instalación de 4 minisplits 2 ton"},
+  {folio:"OT-866",cli:"Clínica Santa Fe",txt:"Cableado y 16 cámaras IP"},
+  {folio:"OT-870",cli:"Residencial Las Palmas",txt:"Torre de 18 m para enlace"},
+  {folio:"OT-872",cli:"Restaurante El Muelle",txt:"Mantenimiento cámara de refrigeración"},
+  {folio:"OT-875",cli:"Escuela Primaria Juárez",txt:"Red WiFi en 12 salones"},
+];
+
+let facturas=[
+  {num:"FAC-2291",prov:"Distribuidora de Cable del Norte",concepto:"Bobinas UTP Cat6",empresa:"Eagle Video",monto:18450,pagado:0,vence:"2026-10-10",status:"pendiente",xml:true,origen:""},
+  {num:"A-5532",prov:"Refacciones Clima Express",concepto:"Compresores y refrigerante",empresa:"Estrella Climatización",monto:32780,pagado:16000,vence:"2026-09-28",status:"vencido",xml:true,origen:"",ot:"OT-861"},
+  {num:"F-118",prov:"Equipos de Red Mayoreo",concepto:"Antenas sectoriales 5 GHz",empresa:"Starnet Wireless",monto:54200,pagado:54200,vence:"2026-09-20",status:"pagado",xml:true,origen:""},
+  {num:"REC-SEP",prov:"Inmobiliaria Pacífico Sur",concepto:"Renta oficina — Septiembre 2026",empresa:"Starnet Wireless",monto:22000,pagado:22000,vence:"2026-09-05",status:"pagado",xml:true,origen:"🔁 Recurrente"},
+  {num:"—",prov:"Herrería Hernández",concepto:"Anticipo base para torre",empresa:"Starnet Wireless",monto:9500,pagado:9500,vence:"2026-09-25",status:"pagado",xml:false,origen:"🔧 Trabajo",ot:"OT-870"},
+];
+
+let recurrentes=[
+  {id:1,prov:"Inmobiliaria Pacífico Sur",concepto:"Renta oficina La Paz",empresa:"Starnet Wireless",zona:"BCS",tipo:"fijo",monto:22000,frec:"Mensual",dIni:1,dFin:5,cat:"Renta",cuenta:"BBVA Starnet BCS",domi:false,xml:true,estado:"activo",fin:"2027-06-30",cargo:null},
+  {id:2,prov:"Fibra Norte Enlaces",concepto:"Enlace dedicado 500 Mbps — torre Centro",empresa:"Starnet Wireless",zona:"BCS",tipo:"fijo",monto:14500,frec:"Mensual",dIni:1,dFin:10,cat:"Internet / Enlaces",cuenta:"BBVA Starnet BCS",domi:true,xml:true,estado:"activo",fin:"",cargo:{monto:14500,pagado:true,xml:true}},
+  {id:3,prov:"Energía Eléctrica (recibo)",concepto:"Luz bodega Culiacán",empresa:"Estrella Climatización",zona:"Sinaloa",tipo:"variable",monto:3800,frec:"Bimestral",dIni:15,dFin:25,cat:"Servicios (luz, agua)",cuenta:"Santander Estrella",domi:false,xml:true,estado:"activo",fin:"",cargo:null,ultimo:"Agosto 2026 · $4,120"},
+  {id:4,prov:"Software Contable Nube",concepto:"Licencia sistema contable (3 usuarios)",empresa:"Eagle Video",zona:"BCS",tipo:"fijo",monto:1890,frec:"Mensual",dIni:1,dFin:3,cat:"Software",cuenta:"Banorte Eagle",domi:true,xml:true,estado:"activo",fin:"",cargo:{monto:1890,pagado:false,xml:false}},
+  {id:5,prov:"Aseguradora Vehicular MX",concepto:"Seguro flotilla (5 unidades)",empresa:"Estrella Climatización",zona:"BCS",tipo:"fijo",monto:41300,frec:"Anual",dIni:10,dFin:15,cat:"Seguros",cuenta:"Santander Estrella",domi:false,xml:true,estado:"activo",fin:"",cargo:null,proximo:"Marzo 2027"},
+  {id:6,prov:"Arrendadora Flotillas",concepto:"Arrendamiento camioneta NP300",empresa:"Starnet Wireless",zona:"Sinaloa",tipo:"fijo",monto:8750,frec:"Mensual",dIni:20,dFin:25,cat:"Arrendamiento vehículos",cuenta:"BBVA Starnet BCS",domi:false,xml:true,estado:"activo",fin:"2028-01-20",cargo:null},
+  {id:7,prov:"Fibra Norte Enlaces",concepto:"Enlace respaldo torre Norte",empresa:"Starnet Wireless",zona:"BCS",tipo:"fijo",monto:6200,frec:"Mensual",dIni:1,dFin:5,cat:"Internet / Enlaces",cuenta:"BBVA Starnet BCS",domi:false,xml:true,estado:"pausado",fin:"",cargo:null},
+];
+
+const ESTADOS_T=[
+  {k:"cotizado",  l:"Cotizado",   c:"#6b7280",bg:"#f3f4f6"},
+  {k:"autorizado",l:"Autorizado", c:"#7c3aed",bg:"#ede9fe"},
+  {k:"en_proceso",l:"En proceso", c:"#1d4ed8",bg:"#dbeafe"},
+  {k:"terminado", l:"Terminado",  c:"#a16207",bg:"#fef9c3"},
+  {k:"pagado",    l:"Pagado",     c:"#15803d",bg:"#dcfce7"},
+];
+let trabajos=[
+  {id:1,prov:"Instalaciones Frías del Mar",ot:"OT-861",desc:"Mano de obra instalación 4 minisplits (subcontrato)",empresa:"Estrella Climatización",zona:"BCS",monto:16000,ant:50,pagos:[{t:"Anticipo",m:8000,f:"2026-09-22"}],entrega:"2026-10-04",estado:"en_proceso",fotos:3,xml:true,notas:"Garantía 6 meses en mano de obra"},
+  {id:2,prov:"Herrería Hernández",ot:"OT-870",desc:"Fabricación de base y anclas para torre 18 m",empresa:"Starnet Wireless",zona:"BCS",monto:19000,ant:50,pagos:[{t:"Anticipo",m:9500,f:"2026-09-25"}],entrega:"2026-09-30",estado:"terminado",fotos:6,xml:false,notas:""},
+  {id:3,prov:"Electricistas Unidos BCS",ot:"OT-866",desc:"Acometida eléctrica para rack de cámaras",empresa:"Eagle Video",zona:"BCS",monto:7800,ant:0,pagos:[],entrega:"2026-10-08",estado:"autorizado",fotos:0,xml:false,notas:"Material lo pone Eagle"},
+  {id:4,prov:"Torres y Estructuras Baja",ot:"OT-875",desc:"Instalación de mástiles en techo (12 puntos)",empresa:"Starnet Wireless",zona:"BCS",monto:12600,ant:30,pagos:[],entrega:"2026-10-15",estado:"cotizado",fotos:0,xml:false,notas:"Cotización válida 15 días"},
+  {id:5,prov:"Fletes Rápidos Culiacán",ot:"",desc:"Flete de equipos de bodega Culiacán a Los Mochis",empresa:"Estrella Climatización",zona:"Sinaloa",monto:4500,ant:0,pagos:[{t:"Finiquito",m:4500,f:"2026-09-18"}],entrega:"2026-09-18",estado:"pagado",fotos:2,xml:true,notas:""},
+];
+
+// ═════════════════════════ UTILIDADES ═════════════════════════
+let tab="facturas";
+const $=id=>document.getElementById(id);
+const fmt=n=>"$"+Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const coTag=c=>`<span class="co" style="color:${CO_COLOR[c]||"#6b7280"};background:${(CO_COLOR[c]||"#6b7280")}15;border:1px solid ${(CO_COLOR[c]||"#6b7280")}33">${esc(c)}</span>`;
+const badge=(txt,c,bg)=>`<span class="badge" style="color:${c};background:${bg}">${txt}</span>`;
+const fFecha=d=>d?new Date(d+"T12:00:00").toLocaleDateString("es-MX",{day:"numeric",month:"short"}):"—";
+const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[-_]/g," ");
+const coincide=(txt,q)=>{q=norm(q).trim();if(!q)return true;const t=norm(txt)+" "+norm(txt).replace(/\s/g,"");return q.split(/\s+/).every(w=>t.includes(w));};
+const kpi=(v,l,s,c)=>`<div class="kpi-card"><p class="kpi-value" style="color:${c||"#374151"}">${v}</p><p class="kpi-label">${l}</p><p class="kpi-sub">${s||""}</p></div>`;
+function filtroComun(empresa,blob){
+  const co=$("f-company").value, q=$("f-search").value;
+  return (co==="Todas"||empresa===co)&&coincide(blob,q);
+}
+
+// ═════════════════════════ PESTAÑAS ═════════════════════════
+const STATUS_OPTS={
+  facturas:[["Todos","Todos"],["pendiente","Pendientes"],["programado","Programados"],["pagado","Pagados"],["vencido","Vencidos"]],
+  recurrentes:[["Todos","Todos"],["pagado","Pagado este periodo"],["generado","Cargo registrado"],["ventana","En ventana"],["vencido","Vencidos"],["proximo","Próximos"],["no_toca","No toca este mes"],["pausado","Pausados"]],
+  trabajos:[["Todos","Todos"],...ESTADOS_T.map(e=>[e.k,e.l])],
+};
+const BTN_NEW={facturas:"+ Nueva factura",recurrentes:"+ Nuevo recurrente",trabajos:"+ Nuevo trabajo"};
+function setTab(t){
+  tab=t;
+  document.querySelectorAll("#tabs .period-pill").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+  $("f-status").innerHTML=STATUS_OPTS[t].map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+  $("btn-new").textContent=BTN_NEW[t];
+  render();
+}
+function nuevo(){
+  if(tab==="facturas"){alert("En la app real abre el formulario de factura que ya existe.");return;}
+  if(tab==="recurrentes"){$("m-rec").style.display="flex";return;}
+  $("m-trab").style.display="flex";
+}
+function cerrar(id){$(id).style.display="none";}
+function segSel(id,btn){$(id).querySelectorAll("button").forEach(b=>b.classList.toggle("on",b===btn));}
+
+function render(){
+  $("cnt-facturas").textContent=facturas.filter(f=>f.status!=="pagado").length;
+  $("cnt-recurrentes").textContent=recurrentes.filter(r=>["ventana","vencido","generado"].includes(estadoRec(r).k)).length;
+  $("cnt-trabajos").textContent=trabajos.filter(t=>t.estado!=="pagado").length;
+  if(tab==="facturas")renderFacturas();
+  else if(tab==="recurrentes")renderRecurrentes();
+  else renderTrabajos();
+}
+
+// ═════════════════════════ 📄 FACTURAS (lo que ya existe) ═════════════════════════
+function renderFacturas(){
+  const st=$("f-status").value;
+  const list=facturas.filter(f=>(st==="Todos"||f.status===st)&&filtroComun(f.empresa,[f.prov,f.concepto,f.num,f.ot].join(" ")));
+  const pend=facturas.filter(f=>f.status!=="pagado");
+  $("kpis").innerHTML=
+    kpi(fmt(pend.reduce((s,f)=>s+f.monto-f.pagado,0)),"Total pendiente",`${pend.length} cuentas`,"#b91c1c")+
+    kpi(facturas.filter(f=>f.status==="vencido").length,"Vencidas","","#ef4444")+
+    kpi(0,"Programadas","","#3b82f6")+
+    kpi(1,"Próx. 7 días",fmt(18450),"#f59e0b")+
+    kpi(3,"Proveedores","con saldo","#374151");
+  $("alert").innerHTML="";
+  const cols="90px 1fr 150px 110px 110px 100px 110px";
+  const S={pendiente:["⏳ Pendiente","#f59e0b","#fffbeb"],programado:["📅 Programado","#3b82f6","#eff6ff"],pagado:["✓ Pagado","#16a34a","#f0fdf4"],vencido:["⚠ Vencido","#ef4444","#fef2f2"]};
+  $("content").innerHTML=`<div class="table-scroll"><div style="min-width:860px">
+    <div class="thead" style="grid-template-columns:${cols}"><span>No.</span><span>Proveedor / Concepto</span><span>Empresa</span><span class="r">Monto</span><span class="r">Pagado</span><span>Vence</span><span>Status</span></div>
+    <div class="tbody">${list.map(f=>`<div class="trow" style="grid-template-columns:${cols}">
+      <div><div class="muted" style="font-family:monospace">${esc(f.num)}</div><div style="font-size:10px;color:${f.xml?"#16a34a":"#b91c1c"}">${f.xml?"✓ XML":"⚠ sin XML"}</div></div>
+      <div style="min-width:0"><div class="strong">${esc(f.prov)}</div><div class="muted">${esc(f.concepto)}</div>
+        <div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap">${f.origen?`<span class="badge" style="background:#f5f3ff;color:#6d28d9;font-size:10px">${f.origen}</span>`:""}${f.ot?`<span class="folio" style="font-size:10px">${f.ot}</span>`:""}</div></div>
+      <div>${coTag(f.empresa)}</div>
+      <div class="r" style="font-weight:700">${fmt(f.monto)}</div>
+      <div class="r" style="color:#16a34a">${fmt(f.pagado)}</div>
+      <div style="font-size:12px">${fFecha(f.vence)}</div>
+      <div>${badge(...S[f.status])}</div>
+    </div>`).join("")||`<div style="padding:30px;text-align:center;color:#9ca3af">Sin resultados</div>`}</div></div></div>
+    <div class="note">ℹ Esta pestaña es la lista actual de CxP, sin cambios. Lo nuevo: los cargos que vienen de un <b>recurrente</b> o de un <b>trabajo</b> se marcan con su etiqueta 🔁 / 🔧 y se pagan aquí igual que siempre.</div>`;
+}
+
+// ═════════════════════════ 🔁 PAGOS RECURRENTES ═════════════════════════
+const MESES_FREC={Mensual:1,Bimestral:2,Trimestral:3,Semestral:6,Anual:12,Semanal:0};
+function tocaEsteMes(r){
+  if(r.frec==="Anual"||r.frec==="Semestral")return !r.proximo;      // en la maqueta: los que tienen "proximo" no tocan
+  if(r.frec==="Bimestral")return true;
+  return true;
+}
+function estadoRec(r){
+  if(r.estado==="pausado")return {k:"pausado",l:"⏸ Pausado",c:"#6b7280",bg:"#f3f4f6"};
+  if(!tocaEsteMes(r))return {k:"no_toca",l:`○ Próximo: ${r.proximo}`,c:"#6b7280",bg:"#f9fafb"};
+  if(r.cargo&&r.cargo.pagado)return {k:"pagado",l:"✓ Pagado",c:"#15803d",bg:"#dcfce7"};
+  if(r.cargo)return {k:"generado",l:"🧾 Cargo registrado · por pagar",c:"#1d4ed8",bg:"#dbeafe"};
+  if(DIA>r.dFin)return {k:"vencido",l:`⚠ Vencido (día ${r.dFin})`,c:"#b91c1c",bg:"#fee2e2"};
+  if(DIA>=r.dIni)return {k:"ventana",l:`● En ventana (hasta día ${r.dFin})`,c:"#b45309",bg:"#fef3c7"};
+  return {k:"proximo",l:`○ Toca del ${r.dIni} al ${r.dFin}`,c:"#6b7280",bg:"#f3f4f6"};
+}
+function mensualEquivalente(r){const m=MESES_FREC[r.frec];return m===0?r.monto*4.33:r.monto/m;}
+function renderRecurrentes(){
+  const st=$("f-status").value;
+  const activos=recurrentes.filter(r=>r.estado==="activo");
+  const list=recurrentes.filter(r=>(st==="Todos"||estadoRec(r).k===st)&&filtroComun(r.empresa,[r.prov,r.concepto,r.cat].join(" ")));
+  const pagadoMes=activos.filter(r=>r.cargo&&r.cargo.pagado).reduce((s,r)=>s+r.cargo.monto,0);
+  const porPagar=activos.filter(r=>tocaEsteMes(r)&&!(r.cargo&&r.cargo.pagado));
+  const venc=activos.filter(r=>estadoRec(r).k==="vencido");
+  const vent=activos.filter(r=>estadoRec(r).k==="ventana");
+  $("kpis").innerHTML=
+    kpi(activos.length,"Recurrentes activos",`${recurrentes.length} en total`)+
+    kpi(fmt(activos.reduce((s,r)=>s+mensualEquivalente(r),0)),"Compromiso mensual","equivalente al mes","#374151")+
+    kpi(fmt(pagadoMes),"Pagado "+PERIODO.split(" ")[0],"","#16a34a")+
+    kpi(porPagar.length,"Por pagar este mes",`<b style="color:#b45309">${fmt(porPagar.reduce((s,r)=>s+(r.cargo?r.cargo.monto:r.monto),0))}</b>`,porPagar.length?"#f59e0b":"#16a34a")+
+    kpi(venc.length+vent.length,"Vencidos / en ventana",`día ${DIA} del mes`,venc.length?"#ef4444":"#9ca3af");
+  $("alert").innerHTML=(venc.length||vent.length)?`<div class="alert">⏰ <b>${vent.length} en ventana de pago</b>${venc.length?` y <b style="color:#b91c1c">${venc.length} vencido(s)</b>`:""} — ${[...venc,...vent].map(r=>esc(r.concepto)).join(" · ")}</div>`:"";
+  const cols="1fr 150px 120px 110px 200px 150px";
+  $("content").innerHTML=`<div class="table-scroll"><div style="min-width:900px">
+    <div class="thead" style="grid-template-columns:${cols}"><span>Proveedor / Concepto</span><span>Empresa</span><span>Frecuencia</span><span class="r">Monto</span><span>${PERIODO}</span><span></span></div>
+    <div class="tbody">${list.map(r=>{const E=estadoRec(r);return `<div class="trow" style="grid-template-columns:${cols};${r.estado==="pausado"?"opacity:.6":""}">
+      <div style="min-width:0"><div class="strong">${esc(r.concepto)}</div><div class="muted">${esc(r.prov)} · ${esc(r.cat)}</div>
+        <div style="display:flex;gap:5px;margin-top:3px;flex-wrap:wrap">
+          ${r.domi?`<span class="badge" style="background:#eff6ff;color:#1d4ed8;font-size:10px">🏦 Domiciliado</span>`:""}
+          ${r.tipo==="variable"?`<span class="badge" style="background:#fef3c7;color:#92400e;font-size:10px">≈ Variable${r.ultimo?" · último "+esc(r.ultimo):""}</span>`:""}
+          ${r.fin?`<span class="badge" style="background:#f3f4f6;color:#6b7280;font-size:10px">Contrato hasta ${fFecha(r.fin)} ${r.fin.slice(0,4)}</span>`:""}
+          ${r.cargo&&r.xml&&!r.cargo.xml?`<span class="badge" style="background:#fef2f2;color:#b91c1c;font-size:10px">⚠ falta XML</span>`:""}
+        </div></div>
+      <div>${coTag(r.empresa)}<div class="muted" style="margin-top:3px">${esc(r.zona)}</div></div>
+      <div style="font-size:12px">${esc(r.frec)}<div class="muted">día ${r.dIni}–${r.dFin}</div></div>
+      <div class="r" style="font-weight:700">${r.tipo==="variable"&&!r.cargo?"≈ ":""}${fmt(r.cargo?r.cargo.monto:r.monto)}</div>
+      <div>${badge(E.l,E.c,E.bg)}</div>
+      <div style="display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap">
+        ${["ventana","vencido","proximo"].includes(E.k)?`<button class="btn-mini green" onclick="abrirCargo(${r.id})">🧾 Registrar cargo</button>`:""}
+        ${E.k==="generado"?`<button class="btn-mini blue" onclick="pagarRec(${r.id})">💸 Pagar</button>`:""}
+        <button class="btn-mini" onclick="togglePausa(${r.id})">${r.estado==="pausado"?"▶ Activar":"⏸"}</button>
+      </div>
+    </div>`;}).join("")||`<div style="padding:30px;text-align:center;color:#9ca3af">Sin resultados</div>`}</div></div></div>
+    <div class="note">ℹ <b>Registrar cargo</b> crea la cuenta del periodo en la pestaña Facturas (con su XML y vencimiento). <b>Pagar</b> abre el mismo pago de CxP de siempre → genera el egreso en Finanzas con la categoría del recurrente. La base de datos impide registrar dos veces el mismo periodo.</div>`;
+}
+let _cargoId=null;
+function abrirCargo(id){
+  const r=recurrentes.find(x=>x.id===id);_cargoId=id;
+  $("m-cargo-sub").innerHTML=`<b>${esc(r.concepto)}</b><br>${esc(r.prov)} · ${PERIODO}${r.tipo==="variable"?`<br><span style="color:#b45309">Monto variable: captura el del recibo real.</span>`:""}`;
+  $("c-monto").value=r.tipo==="variable"?"":r.monto;
+  $("c-vence").value=`2026-10-${String(r.dFin).padStart(2,"0")}`;
+  $("m-cargo").style.display="flex";
+}
+function confirmarCargo(){
+  const r=recurrentes.find(x=>x.id===_cargoId);const m=parseFloat($("c-monto").value);
+  if(!m){alert("Captura el monto.");return;}
+  r.cargo={monto:m,pagado:false,xml:false};
+  facturas.unshift({num:"REC-OCT",prov:r.prov,concepto:`${r.concepto} — ${PERIODO}`,empresa:r.empresa,monto:m,pagado:0,vence:$("c-vence").value,status:"pendiente",xml:false,origen:"🔁 Recurrente"});
+  cerrar("m-cargo");render();
+}
+function pagarRec(id){
+  const r=recurrentes.find(x=>x.id===id);
+  if(!confirm(`(Maqueta) Pagar ${fmt(r.cargo.monto)} a ${r.prov}?\n\nEn la app real se abre el modal de pago de CxP que ya existe.`))return;
+  r.cargo.pagado=true;
+  const f=facturas.find(x=>x.prov===r.prov&&x.concepto.includes(r.concepto)&&x.status!=="pagado");if(f){f.pagado=f.monto;f.status="pagado";}
+  render();
+}
+function togglePausa(id){const r=recurrentes.find(x=>x.id===id);r.estado=r.estado==="pausado"?"activo":"pausado";render();}
+function guardarRec(){
+  const concepto=$("r-concepto").value.trim(),monto=parseFloat($("r-monto").value);
+  if(!concepto||!monto){alert("Concepto y monto son obligatorios.");return;}
+  recurrentes.unshift({id:Date.now(),prov:$("r-prov").value,concepto,empresa:$("r-empresa").value,zona:$("r-zona").value,
+    tipo:$("r-tipo").querySelector(".on").dataset.v,monto,frec:$("r-frec").value,dIni:+$("r-dini").value||1,dFin:+$("r-dfin").value||5,
+    cat:$("r-cat").value,cuenta:$("r-cuenta").value,domi:$("r-domi").checked,xml:$("r-xml").checked,estado:"activo",fin:$("r-fin").value,cargo:null});
+  cerrar("m-rec");$("r-concepto").value="";$("r-monto").value="";render();
+}
+
+// ═════════════════════════ 🔧 TRABAJOS DE PROVEEDORES ═════════════════════════
+const pagadoT=t=>t.pagos.reduce((s,p)=>s+p.m,0);
+const idxEstado=k=>ESTADOS_T.findIndex(e=>e.k===k);
+function renderTrabajos(){
+  const st=$("f-status").value;
+  const list=trabajos.filter(t=>{const ot=OTS.find(o=>o.folio===t.ot);
+    return (st==="Todos"||t.estado===st)&&filtroComun(t.empresa,[t.prov,t.desc,t.ot,ot?ot.cli:""].join(" "));});
+  const abiertos=trabajos.filter(t=>t.estado!=="pagado"&&t.estado!=="cotizado");
+  const comprometido=abiertos.reduce((s,t)=>s+t.monto,0);
+  const porPagar=abiertos.reduce((s,t)=>s+t.monto-pagadoT(t),0);
+  const terminadosSinPagar=trabajos.filter(t=>t.estado==="terminado");
+  const atrasados=trabajos.filter(t=>["autorizado","en_proceso"].includes(t.estado)&&t.entrega&&new Date(t.entrega+"T12:00:00")<HOY);
+  $("kpis").innerHTML=
+    kpi(abiertos.length,"Trabajos abiertos",`${trabajos.filter(t=>t.estado==="cotizado").length} cotizaciones`)+
+    kpi(fmt(comprometido),"Comprometido","autorizados en curso","#374151")+
+    kpi(fmt(porPagar),"Por pagar","saldo de los abiertos","#b91c1c")+
+    kpi(terminadosSinPagar.length,"Terminados sin pagar",terminadosSinPagar.length?"listos para finiquito":"",terminadosSinPagar.length?"#f59e0b":"#16a34a")+
+    kpi(atrasados.length,"Atrasados","pasó la fecha de entrega",atrasados.length?"#ef4444":"#9ca3af");
+  $("alert").innerHTML=terminadosSinPagar.length?`<div class="alert">✅ <b>${terminadosSinPagar.length} trabajo(s) terminado(s)</b> esperando finiquito — ${terminadosSinPagar.map(t=>esc(t.prov)).join(" · ")}</div>`:"";
+  $("content").innerHTML=`<div class="cards">${list.map(t=>{
+    const E=ESTADOS_T[idxEstado(t.estado)];const pg=pagadoT(t);const pct=t.monto?Math.round(pg/t.monto*100):0;
+    const ot=OTS.find(o=>o.folio===t.ot);const i=idxEstado(t.estado);
+    const anticipo=Math.round(t.monto*t.ant/100);
+    const atrasado=atrasados.includes(t);
+    let accion="";
+    if(t.estado==="cotizado")accion=`<button class="btn-mini green" onclick="avanzar(${t.id})">✓ Autorizar</button>`;
+    else if(t.estado==="autorizado")accion=(t.ant&&!t.pagos.length?`<button class="btn-mini blue" onclick="pagarT(${t.id},'Anticipo',${anticipo})">💸 Anticipo ${fmt(anticipo)}</button>`:"")+`<button class="btn-mini" onclick="avanzar(${t.id})">▶ Iniciar</button>`;
+    else if(t.estado==="en_proceso")accion=`<button class="btn-mini green" onclick="avanzar(${t.id})">✓ Marcar terminado</button>`;
+    else if(t.estado==="terminado")accion=`<button class="btn-mini blue" onclick="pagarT(${t.id},'Finiquito',${t.monto-pg})">💸 Finiquito ${fmt(t.monto-pg)}</button>`;
+    return `<div class="card" style="border-left:4px solid ${E.c}">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${t.ot?`<span class="folio">${t.ot}</span>`:`<span class="badge" style="background:#f3f4f6;color:#6b7280">Sin OT</span>`}${coTag(t.empresa)}</div>
+        ${badge(E.l,E.c,E.bg)}
+      </div>
+      <div class="strong" style="margin-top:8px;white-space:normal">${esc(t.prov)}</div>
+      <div style="font-size:12px;color:#374151;margin-top:2px">${esc(t.desc)}</div>
+      ${ot?`<div style="font-size:11px;color:#16a34a;margin-top:4px">👤 ${esc(ot.cli)} — ${esc(ot.txt)}</div>`:""}
+      <div class="steps">${ESTADOS_T.map((e,j)=>`<div class="step" title="${e.l}" style="background:${j<=i?E.c:"#e5e7eb"}"></div>`).join("")}</div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#9ca3af">${ESTADOS_T.map(e=>`<span>${e.l}</span>`).join("")}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-top:12px;font-size:12px">
+        <div><span class="muted">Acordado</span><div style="font-weight:700">${fmt(t.monto)}</div></div>
+        <div><span class="muted">Pagado</span><div style="font-weight:700;color:#16a34a">${fmt(pg)} <span style="font-size:10px;color:#9ca3af">(${pct}%)</span></div></div>
+        <div><span class="muted">Anticipo</span><div>${t.ant?`${t.ant}% · ${fmt(anticipo)}`:"Sin anticipo"}</div></div>
+        <div><span class="muted">Entrega</span><div style="${atrasado?"color:#b91c1c;font-weight:700":""}">${fFecha(t.entrega)}${atrasado?" · atrasado":""}</div></div>
+      </div>
+      <div class="bar"><div style="width:${pct}%"></div></div>
+      ${t.pagos.length?`<div style="margin-top:8px;font-size:11px;color:#6b7280">${t.pagos.map(p=>`💸 ${p.t} ${fmt(p.m)} · ${fFecha(p.f)}`).join("<br>")}</div>`:""}
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;font-size:10px">
+        <span class="badge" style="background:${t.fotos?"#f0fdf4":"#f9fafb"};color:${t.fotos?"#15803d":"#9ca3af"};font-size:10px">📷 ${t.fotos} evidencia${t.fotos!==1?"s":""}</span>
+        <span class="badge" style="background:${t.xml?"#f0fdf4":"#fef2f2"};color:${t.xml?"#15803d":"#b91c1c"};font-size:10px">${t.xml?"✓ XML":"⚠ sin XML"}</span>
+      </div>
+      ${t.notas?`<div class="muted" style="margin-top:6px;white-space:normal">📝 ${esc(t.notas)}</div>`:""}
+      ${accion?`<div style="display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid #f3f4f6;flex-wrap:wrap;justify-content:flex-end">${accion}</div>`:""}
+    </div>`;}).join("")||`<div style="padding:30px;text-align:center;color:#9ca3af;background:#fff;border-radius:12px">Sin resultados</div>`}</div>
+    <div class="note">ℹ Cada pago (anticipo o finiquito) crea una cuenta en la pestaña Facturas marcada 🔧 Trabajo y se paga con el flujo normal de CxP → egreso en Finanzas ligado a la OT. El costo aparece en "gastos de la OT". <b>Por definir contigo:</b> si se puede pagar el finiquito antes de "Terminado", retenciones ISR/IVA y quién autoriza.</div>`;
+}
+function avanzar(id){const t=trabajos.find(x=>x.id===id);const i=idxEstado(t.estado);if(i<ESTADOS_T.length-1)t.estado=ESTADOS_T[i+1].k;render();}
+function pagarT(id,tipo,monto){
+  const t=trabajos.find(x=>x.id===id);
+  if(!confirm(`(Maqueta) Registrar ${tipo} de ${fmt(monto)} a ${t.prov}?\n\nEn la app real se abre el modal de pago de CxP.`))return;
+  t.pagos.push({t:tipo,m:monto,f:"2026-10-02"});
+  facturas.unshift({num:"—",prov:t.prov,concepto:`${tipo} — ${t.desc}`,empresa:t.empresa,monto,pagado:monto,vence:"2026-10-02",status:"pagado",xml:t.xml,origen:"🔧 Trabajo",ot:t.ot});
+  if(pagadoT(t)>=t.monto-0.01)t.estado="pagado";
+  render();
+}
+function guardarTrab(){
+  const desc=$("t-desc").value.trim(),monto=parseFloat($("t-monto").value);
+  if(!desc||!monto){alert("Descripción y monto son obligatorios.");return;}
+  trabajos.unshift({id:Date.now(),prov:$("t-prov").value,ot:$("t-ot").value,desc,empresa:$("t-empresa").value,zona:$("t-zona").value,
+    monto,ant:+$("t-ant").value||0,pagos:[],entrega:$("t-entrega").value,estado:$("t-estado").value,fotos:0,xml:false,notas:$("t-notas").value.trim()});
+  cerrar("m-trab");$("t-desc").value="";$("t-monto").value="";render();
+}
+
+// ═════════════════════════ INICIO ═════════════════════════
+$("r-prov").innerHTML=PROVEEDORES.map(p=>`<option>${esc(p)}</option>`).join("");
+$("t-prov").innerHTML=PROVEEDORES.map(p=>`<option>${esc(p)}</option>`).join("");
+$("t-ot").innerHTML=`<option value="">— Sin OT (gasto interno) —</option>`+OTS.map(o=>`<option value="${o.folio}">${o.folio} · ${esc(o.cli)} — ${esc(o.txt)}</option>`).join("");
+setTab("facturas");
+</script>
+</body>
+</html>
